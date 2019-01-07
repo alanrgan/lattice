@@ -27,6 +27,10 @@ class Chord
     def kind
       :set
     end
+
+    def self.type
+      :set
+    end
   end
 
   struct GetCommand < Command
@@ -36,6 +40,10 @@ class Chord
     def kind
       :get
     end
+
+    def self.type
+      :get
+    end
   end
 
   struct ListLocalCommand < Command
@@ -43,6 +51,10 @@ class Chord
     end
 
     def kind
+      :list_local
+    end
+
+    def self.type
       :list_local
     end
   end

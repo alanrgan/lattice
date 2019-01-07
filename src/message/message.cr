@@ -22,6 +22,10 @@ module Message
     def kind
       :base
     end
+
+    def self.type
+      :base
+    end
   end
 
   struct ConnectionRequest < Packet
@@ -38,6 +42,10 @@ module Message
     def kind
       :conn_request
     end
+
+    def self.type
+      :conn_request
+    end
   end
 
   struct NetStat < Packet
@@ -50,12 +58,16 @@ module Message
     def kind
       :net_stat
     end
+
+    def self.type
+      :net_stat
+    end
   end
 
   struct ChordPacket < Packet
     property is_response = false
     
-    def initialize(@type : String, @uid : String, @origin : {UInt64, String}, @command : Chord::Command)
+    def initialize(@type : String, @uid : String, @origin : {UInt64, String}, @command : String)
     end
 
     def kind
@@ -63,7 +75,21 @@ module Message
     end
 
     def self.from_command(command : Chord::Command, uid : String, origin : {UInt64, String})
-      new(command.kind.to_s, uid, origin, command)
+      new(command.kind.to_s, uid, origin, command.serialize)
+    end
+
+    def self.type
+      :chord_packet
+    end
+
+    def command
+      command_type = Chord::CommandType.parse(@type)
+      case command_type
+      when .set? then Chord::Command.deserialize_as Chord::SetCommand, @command
+      when .get? then Chord::Command.deserialize_as Chord::GetCommand, @command
+      when .list_local? then Chord::Command.deserialize_as Chord::ListLocalCommand, @command
+      end
+      # Chord::Command.deserialize_as command_type, @command
     end
   end
 end

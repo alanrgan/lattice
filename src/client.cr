@@ -45,7 +45,7 @@ class Client
   def handle_message(message : Message::Base)
     case message.packet_type
     when .net_stat?
-      net_stat = Message::Packet.deserialize_as Message::Type::NetStat, message.data
+      net_stat = Message::Packet.deserialize_as Message::NetStat, message.data
       puts "Got net_stat #{net_stat}"
     else
       puts message.data

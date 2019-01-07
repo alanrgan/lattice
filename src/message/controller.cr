@@ -94,14 +94,14 @@ class Message::Controller
         return
       elsif callback = @message_callback
         begin
-          base_packet = Message::Packet.deserialize_as Message::Type::Base, message
+          base_packet = Message::Packet.deserialize_as Message::Base, message
         rescue ex
           puts ex
           self.mark_as_failed ip
           return
         end
 
-        callback.call(base_packet) if base_packet.is_a?(Message::Base)
+        callback.call(base_packet)
       end
     end
   end

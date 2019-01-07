@@ -50,7 +50,11 @@ module Lattice
           uid: "abcdef",
           origin: {12345_u64, "localhost"}
         )
-        puts chord_message.serialize
+        message = chord_message.serialize
+        packet = Message::Packet.deserialize_as Message::ChordPacket, message#_as Message::Type::ChordPacket, message
+        puts packet.command
+        # chord_packet = packet.as(Message::ChordPacket)
+        # puts chord_message.command
       rescue ex : Clap::ParseError
         STDERR.puts ex
       end

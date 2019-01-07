@@ -8,7 +8,7 @@ abstract struct Serializable(T)
 
   private class Repr
     JSON.mapping(
-      kind: String,
+      type: String,
       data: String
     )
   end
@@ -18,7 +18,7 @@ abstract struct Serializable(T)
   def serialize
     JSON.build do |json|
       json.object do
-        json.field "kind", self.kind
+        json.field "type", self.kind
         json.field "data", self.to_json
       end
     end
@@ -27,12 +27,25 @@ abstract struct Serializable(T)
   def self.deserialize_as(type : T, value : String)
     deserialized_repr = Repr.from_json value
 
-    if deserialized_repr.kind === type.to_s.underscore && (packet_class = type.as_kind)
+    if deserialized_repr.type === type.to_s.underscore && (packet_class = type.as_kind)
       packet_class.from_json deserialized_repr.data
     else
       raise SerializationError.new(
+        "Mismatched types: \
+        Expected #{type.to_s.underscore}, received #{deserialized_repr.type}"
+      )
+    end
+  end
+
+  def self.deserialize_as(klass : K.class, value : String) forall K
+    deserialized_repr = Repr.from_json value
+
+    if deserialized_repr.type === klass.type.to_s.underscore
+      klass.from_json deserialized_repr.data
+    else
+      raise SerializationError.new(
         "Mismatched kinds: \
-        Expected #{deserialized_repr.kind}, received #{type.to_s.underscore}"
+        Expected #{klass.type.to_s}, received #{deserialized_repr.type}"
       )
     end
   end
