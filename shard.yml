@@ -1,0 +1,13 @@
+name: lattice
+version: 0.1.0
+
+authors:
+  - Alan Gan <alanrgan@gmail.com>
+
+targets:
+  lattice:
+    main: src/lattice.cr
+
+crystal: 0.26.1
+
+license: MIT

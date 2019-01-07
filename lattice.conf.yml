@@ -1,0 +1,7 @@
+local:
+  address: 192.168.1.201
+  port: 1280
+
+known_hosts:
+  - { address: 192.168.1.201, port: 1234 }
+  - { address: 192.168.1.201, port: 3333 }
