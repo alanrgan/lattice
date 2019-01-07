@@ -1,11 +1,11 @@
 require "./message"
 require "./chord"
+require "./client/*"
 
 class Client
   CONN_TIMEOUT_SECONDS = 0.3
 
   @controller : Message::Controller
-  @chord = Chord.new
 
   class ConnectionError < Exception
   end
@@ -17,7 +17,7 @@ class Client
 
     spawn self.listen @local_ip.port
 
-    #Attempt to connect to a seed
+    # Attempt to connect to a seed
     seeds.each do |seed|
       begin
         socket = TCPSocket.new seed.address,

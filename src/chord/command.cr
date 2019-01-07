@@ -21,41 +21,27 @@ class Chord
   end
 
   struct SetCommand < Command
+    Serializable.with_kind :set
+    
+    getter value : String
+
     def initialize(@key : String, @value : String)
-    end
-
-    def kind
-      :set
-    end
-
-    def self.type
-      :set
     end
   end
 
   struct GetCommand < Command
+    Serializable.with_kind :get
+    
+    getter key
+
     def initialize(@key : String)
-    end
-
-    def kind
-      :get
-    end
-
-    def self.type
-      :get
     end
   end
 
   struct ListLocalCommand < Command
+    Serializable.with_kind :list_local
+
     def initialize
-    end
-
-    def kind
-      :list_local
-    end
-
-    def self.type
-      :list_local
     end
   end
 end

@@ -45,16 +45,7 @@ module Lattice
     else
       begin
         command = Clap.parse(command)
-        chord_message = Message::ChordPacket.from_command(
-          command: command,
-          uid: "abcdef",
-          origin: {12345_u64, "localhost"}
-        )
-        message = chord_message.serialize
-        packet = Message::Packet.deserialize_as Message::ChordPacket, message#_as Message::Type::ChordPacket, message
-        puts packet.command
-        # chord_packet = packet.as(Message::ChordPacket)
-        # puts chord_message.command
+        client.process_command(command)
       rescue ex : Clap::ParseError
         STDERR.puts ex
       end

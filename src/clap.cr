@@ -14,21 +14,14 @@ module Clap
         self.expect(argv, 2, exc: "Usage: SET <key>, <value>", op: :gthan) do
           value = argv[2..-1].join(" ")
           Chord::SetCommand.new(key: argv[1], value: value)
-          # {
-          #   "type" => "SET",
-          #   "key" => argv[1],
-          #   "value" => value
-          # }
         end
       when "GET"
         self.expect(argv, 2, exc: "Usage: GET <key>") do
           Chord::GetCommand.new(key: argv[1])
-          # {"type" => "GET", "key" => argv[1]}
         end
       when "LIST_LOCAL"
         self.expect(argv, 1, exc: "Usage: LIST_LOCAL") do
           Chord::ListLocalCommand.new
-          # {"type" => "LIST_LOCAL"}
         end
       else
         raise ParseError.new("Invalid command #{argv[0]}\n \

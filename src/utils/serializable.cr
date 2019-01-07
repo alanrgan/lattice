@@ -15,6 +15,17 @@ abstract struct Serializable(T)
 
   abstract def kind : Symbol
 
+  # Helper macro to auto-define boilerplate type/kind getters
+  macro with_kind(kind)
+    def kind
+      {{ kind }}
+    end
+
+    def self.type
+      {{ kind }}
+    end
+  end
+
   def serialize
     JSON.build do |json|
       json.object do
