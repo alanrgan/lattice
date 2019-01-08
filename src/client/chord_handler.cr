@@ -1,8 +1,5 @@
 class Client
-  @chord = Chord.new
-
-  def process_command(command : Chord::Command)
+  def process_command(command)
     @chord.process_command command
   end
 end
-    

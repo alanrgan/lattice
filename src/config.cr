@@ -14,7 +14,5 @@ struct Config
     File.open(file) do |f|
       self.from_yaml(f)
     end
-    # @@data = YAML.parse(ARGF)
-    # @@data
   end
 end

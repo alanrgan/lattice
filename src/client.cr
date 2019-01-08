@@ -11,6 +11,8 @@ class Client
   end
 
   def initialize(@local_ip : Socket::IPAddress, seeds : Array(Socket::IPAddress))
+    @chord = Chord.new @local_ip
+
     @controller = Message::Controller.new @local_ip
     @controller.on_message &->self.handle_message(Message::Base)
     @controller.on_failure { |ip| puts ip }

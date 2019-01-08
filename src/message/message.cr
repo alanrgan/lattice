@@ -1,5 +1,7 @@
 require "json"
 require "socket"
+require "uuid"
+
 require "./*"
 require "../converters"
 require "../utils/serializable"
@@ -50,12 +52,14 @@ module Message
     Serializable.with_kind :chord_packet
   
     property is_response = false
+    getter uid
     
     def initialize(@type : String, @uid : String, @origin : {UInt64, String}, @command : String)
     end
 
 
-    def self.from_command(command : Chord::Command, uid : String, origin : {UInt64, String})
+    def self.from_command(command : Chord::Command, origin : {UInt64, String})
+      uid = UUID.random.to_s
       new(command.kind.to_s, uid, origin, command.serialize)
     end
 

@@ -22,7 +22,8 @@ class Chord
 
   struct SetCommand < Command
     Serializable.with_kind :set
-    
+   
+    getter key
     getter value : String
 
     def initialize(@key : String, @value : String)
