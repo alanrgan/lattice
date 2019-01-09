@@ -1,4 +1,3 @@
-# require "./client"
 require "./chord"
 require "./config"
 require "./clap"

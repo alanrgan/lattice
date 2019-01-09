@@ -20,7 +20,28 @@ class Chord::Controller
       end
     end
   end
-  
+
+  def dispatch(ip : Socket::IPAddress, packet : Message::ChordPacket, concurrent = true, &block : Message::Packet ->)
+    ChannelBundle.instance.make_response_chan(packet.uid)
+    self.dispatch(ip, packet)
+    Controller.await_response(packet, concurrent, &block)
+  end
+
+  def dispatch_and_wait(ip : Socket::IPAddress, packet : Message::ChordPacket, &block : Message::Packet ->)
+    self.dispatch(ip, packet, concurrent: false, &block)
+  end
+
+  macro await_response(packet, concurrent = true, &block : Message::Packet ->)
+    {% if concurrent %}
+    spawn do
+    {% end %}
+    response = ChannelBundle.instance.await({{packet}}.uid)
+    block.call(response)
+    {% if concurrent %}
+    end
+    {% end %}
+  end
+
   private def handle_outgoing_messages
     loop do
       message = @out_channel.receive

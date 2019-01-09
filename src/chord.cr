@@ -4,7 +4,7 @@ require "./chord/message/*"
 class Chord
   @local_hash : {UInt64, String}
   @controller : Controller
-  getter channels : Chord::ChannelBundle = Chord::ChannelBundle.instance
+  getter channels : ChannelBundle = ChannelBundle.instance
   getter store = Store.new
 
   class ConnectionError < Exception
@@ -38,20 +38,33 @@ class Chord
     when .net_stat?
       net_stat = Message::Packet.deserialize_as Message::NetStat, message.data
       puts "Got net_stat #{net_stat}"
-    else
-      puts message.data
+    when .chord_packet?
+      chord_packet = Message::Packet.deserialize_as Message::ChordPacket, message.data
+      puts "got chord packet, #{chord_packet}"
+      @channels.send(chord_packet)
+      # # puts message.data
     end
   end
 
   # For testing purposes only
   def run
-    ip_addrs = ["127.0.0.1:80", "0.0.0.0:12345"].map do |addr|
-      Socket::IPAddress.parse "ip://#{addr}"
+    # ip_addrs = ["127.0.0.1:80", "0.0.0.0:12345"].map do |addr|
+    #   Socket::IPAddress.parse "ip://#{addr}"
+    # end
+  
+    # packet = Message::NetStat.new(ip_addrs)
+    get_cmd = Chord::GetCommand.new "hello"
+    packet = Message::ChordPacket.from_command(get_cmd, @local_hash)
+
+    response_packet = Message::ChordPacket.new("get_response", packet.uid, @local_hash, "hi", is_response: true)
+
+    @controller.connected_ips.each do |ip|
+      @controller.dispatch ip, packet do |response|
+        puts "Got response: #{response}"
+      end
+      @controller.dispatch ip, response_packet
     end
-  
-    packet = Message::NetStat.new(ip_addrs)
-  
-    @controller.broadcast packet
+    # @controller.broadcast packet
     loop do
       @controller.read
     end

@@ -6,7 +6,7 @@ class Chord::Controller
   @out_channel = Channel(Message::Packet).new
   getter connected_ips = Set(Socket::IPAddress).new
 
-  @dispatcher = Chord::Dispatcher.new
+  @dispatcher = Dispatcher.new
 
   def initialize(@local_ip : Socket::IPAddress)
     spawn self.handle_failure

@@ -24,5 +24,22 @@ class Chord
 
   # Ask successor node who its predecessor is
   private def query_predecessor
+    # if successor = self.successor
+    #   predecessor_request = PredecessorRequest.new
+    #   @controller.dispatch(successor.ip, predecessor_request) do |response|
+    #     if response.is_a?(Response::Predecessor)
+    #       self.update_predecessor(response.predecessor, successor)
+    #       self.notify_successor
+    #     end
+    #   end
+    # end
+    get_cmd = GetCommand.new "hello"
+    packet = Message::ChordPacket.from_command(get_cmd, @local_hash)
+
+    # @controller.connected_ips.each do |ip|
+    #   @controller.dispatch ip, packet do
+    #     puts "got response"
+    #   end
+    # end
   end
 end

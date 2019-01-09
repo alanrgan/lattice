@@ -38,7 +38,7 @@ class Chord
       # the new node with an array of the current nodes in the network
 
       net_state = Message::NetStat.new @controller.connected_ips.to_a
-
+      
       @controller.dispatch client.remote_address, net_state
     end
   end

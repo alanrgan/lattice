@@ -1,4 +1,3 @@
-# require "../message"
 require "../utils/serializable"
 
 class Chord
@@ -48,7 +47,7 @@ class Chord
         when Chord::ListLocalCommand
           self.process_list_local(command)
         end
-      rescue Serializable::SerializationError
+      rescue Serializable::SerializationError | ArgumentError
         STDERR.puts "Could not deserialize ChordMessage with type: #{packet.type}"
       end
     end

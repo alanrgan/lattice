@@ -1,5 +1,3 @@
-# require "../message"
-
 class Chord
   class ChannelBundle
     @@instance = new
@@ -10,8 +8,16 @@ class Chord
     private def initialize
     end
 
+    def send(packet : Message::ChordPacket)
+      @incoming_chan.send(packet)
+    end
+
     def receive
       @incoming_chan.receive
+    end
+
+    def await(uid)
+      @response_channels[uid].receive
     end
 
     def make_response_chan(uid : String)
@@ -28,13 +34,13 @@ class Chord
         if response.is_response? && (chan = @response_channels[uid]?)
           chan.send(response)
         else
-          yield
+          yield response
         end
       end
     end
 
     def put_response?(response : Message::ChordPacket)
-      self.put_response(response) { nil }
+      self.put_response(response) { |_| nil }
     end
     
     def self.instance
