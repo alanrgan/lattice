@@ -1,7 +1,7 @@
 require "json"
-require "../utils/serializable"
+require "../../utils/serializable"
 
-module Message
+module Chord::Message
   extend self
 
   enum Type

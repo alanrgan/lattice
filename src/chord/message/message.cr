@@ -3,11 +3,11 @@ require "socket"
 require "uuid"
 
 require "./*"
-require "../converters"
-require "../utils/serializable"
-require "../chord/command"
+require "../../converters"
+require "../../utils/serializable"
+require "../command"
 
-module Message
+module Chord::Message
   struct Base < Packet
     Serializable.with_kind :base
 
@@ -51,10 +51,11 @@ module Message
   struct ChordPacket < Packet
     Serializable.with_kind :chord_packet
   
-    property is_response = false
+    getter? is_response = false
     getter uid
-    
-    def initialize(@type : String, @uid : String, @origin : {UInt64, String}, @command : String)
+    getter type
+
+    def initialize(@type : String, @uid : String, @origin : {UInt64, String}, @command : String, *, @is_response = false)
     end
 
 

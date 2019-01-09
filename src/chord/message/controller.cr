@@ -1,12 +1,12 @@
 require "./controller/*"
 
-class Message::Controller
+class Chord::Controller
   @fail_mux = Mutex.new
   @fail_channel = Channel(Socket::IPAddress).new
   @out_channel = Channel(Message::Packet).new
   getter connected_ips = Set(Socket::IPAddress).new
 
-  @dispatcher = Message::Dispatcher.new
+  @dispatcher = Chord::Dispatcher.new
 
   def initialize(@local_ip : Socket::IPAddress)
     spawn self.handle_failure

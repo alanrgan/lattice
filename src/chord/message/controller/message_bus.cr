@@ -1,4 +1,4 @@
-class Message::Controller
+class Chord::Controller
   def broadcast(packet : Message::Packet)
     @out_channel.send packet
     if callback = @message_callback

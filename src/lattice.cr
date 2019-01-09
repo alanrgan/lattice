@@ -1,5 +1,5 @@
-require "./message"
-require "./client"
+# require "./client"
+require "./chord"
 require "./config"
 require "./clap"
 
@@ -29,7 +29,7 @@ module Lattice
   local_ip = config.local_host.to_ip
   seeds = config.known_hosts.map &.to_ip
 
-  client = Client.new(local_ip, seeds)
+  client = Chord.new(local_ip, seeds)
 
   spawn client.run
 

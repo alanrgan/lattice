@@ -1,4 +1,4 @@
-class Message::Dispatcher
+class Chord::Dispatcher
   # Mutex to synchronize IP-Connection access
   @mux = Mutex.new
   @ip_to_connection = Hash(Socket::IPAddress, Connection).new

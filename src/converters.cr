@@ -1,14 +1,14 @@
 require "json"
 
-require "./message"
+require "./chord/message"
 
 class TypeConverter
-  def self.to_json(value : Message::Type, json : JSON::Builder)
+  def self.to_json(value : Chord::Message::Type, json : JSON::Builder)
     json.string(value.to_s)
   end
 
   def self.from_json(value : JSON::PullParser)
-    Message::Type.parse(value.read_string)
+    Chord::Message::Type.parse(value.read_string)
   end
 end
 

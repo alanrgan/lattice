@@ -14,6 +14,11 @@ class Chord
       when .list_local? then ListLocalCommand
       end
     end
+
+    def is_response?
+      ## TODO
+      false
+    end
   end
 
   abstract struct Command < Serializable(CommandType)
