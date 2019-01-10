@@ -4,26 +4,25 @@ class Chord
   def process_command(command : Command)
     case command
     when SetCommand
-      key_hash = CHash.digest_pair(command.key)
       packet = Message::ChordPacket.from_command command, @local_hash
-      self.route(packet, hash: key_hash).await(5) do |response|
+      self.route(packet, key: command.key).await(5) do |response|
         puts response
       end
     when GetCommand
-      key_hash = CHash.digest_pair(command.key)
+      key = command.key
       # If found locally, return the value
-      if value = @store[key_hash]
+      if value = @store[key]
         puts "Found: #{value[0]}"
       # otherwise route according to Chord protocol
       else
         packet = Message::ChordPacket.from_command command, @local_hash
-        self.route(packet, hash: key_hash).await(5) do |response|
+        self.route(packet, key: key).await(5) do |response|
           puts "response"
         end
       end
     when ListLocalCommand
       @store.each_key do |key|
-        puts key[1]
+        puts key[:value]
       end
       puts "END LIST_LOCAL"
     end

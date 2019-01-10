@@ -13,6 +13,28 @@ class Chord::Controller
     spawn self.handle_outgoing_messages
   end
 
+  def dial(ips : Array(Socket::IPAddress))
+    ips.each do |ip|
+      self.dial(ip) { |_| nil }
+    end
+  end
+
+  def dial(ip : Socket::IPAddress)
+    self.dial(ip) { |ex| raise ex }
+  end
+
+  def dial(ip : Socket::IPAddress)
+    begin
+      socket = TCPSocket.new ip.address,
+                            ip.port, 
+                            connect_timeout: Chord::CONN_TIMEOUT_SECONDS
+    rescue ex
+      yield ex
+      return
+    end
+    self.add_connection(ip, socket)
+  end
+
   def add_connection(addr, socket)
     @fail_mux.synchronize do
       @connected_ips.add addr

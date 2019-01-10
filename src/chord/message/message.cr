@@ -42,7 +42,7 @@ module Chord::Message
     Serializable.with_kind :net_stat
 
     @[JSON::Field(converter: SocketArrayConverter)]
-    @ip_addresses = [] of Socket::IPAddress
+    getter ip_addresses = [] of Socket::IPAddress
 
     def initialize(@ip_addresses : Array(Socket::IPAddress))
     end
@@ -55,11 +55,11 @@ module Chord::Message
     getter uid
     getter type
 
-    def initialize(@type : String, @uid : String, @origin : {UInt64, String}, @command : String, *, @is_response = false)
+    def initialize(@type : String, @uid : String, @origin : NodeHash, @command : String, *, @is_response = false)
     end
 
 
-    def self.from_command(command : Chord::Command, origin : {UInt64, String})
+    def self.from_command(command : Chord::Command, origin : NodeHash)
       uid = UUID.random.to_s
       new(command.kind.to_s, uid, origin, command.serialize)
     end

@@ -2,8 +2,15 @@ require "./chord/*"
 require "./chord/message/*"
 
 class Chord
-  @local_hash : {UInt64, String}
+  # M, where Chord supports 2^M possible keys
+  M = 64
+
+  alias NodeHash = StoreKey
+
+  @local_hash : NodeHash
   @controller : Controller
+  @finger_table : FingerTable
+
   getter channels : ChannelBundle = ChannelBundle.instance
   getter store = Store.new
 
@@ -12,7 +19,9 @@ class Chord
 
   def initialize(@local_ip : Socket::IPAddress, @seeds : Array(Socket::IPAddress))
     ip_str = @local_ip.to_s
-    @local_hash = {CHash.digest(ip_str), ip_str}
+    @local_hash = {hash: CHash.digest(ip_str), value: ip_str}
+
+    @finger_table = FingerTable.new @local_hash
 
     @controller = Controller.new @local_ip
     @controller.on_message &->self.handle_message(Message::Base)
@@ -37,7 +46,8 @@ class Chord
     case message.packet_type
     when .net_stat?
       net_stat = Message::Packet.deserialize_as Message::NetStat, message.data
-      puts "Got net_stat #{net_stat}"
+      @finger_table.populate_with(net_stat.ip_addresses)
+      @controller.dial(net_stat.ip_addresses)
     when .chord_packet?
       chord_packet = Message::Packet.deserialize_as Message::ChordPacket, message.data
       puts "got chord packet, #{chord_packet}"

@@ -4,23 +4,26 @@ class Chord
   def dial_seeds
     @seeds.each do |seed|
       begin
-        socket = TCPSocket.new seed.address,
-                               seed.port,
-                               connect_timeout: CONN_TIMEOUT_SECONDS
-      rescue ex
-        break
+        @controller.dial(seed)
+        # socket = TCPSocket.new seed.address,
+        #                        seed.port,
+        #                        connect_timeout: CONN_TIMEOUT_SECONDS
+      rescue
+        next
+      else
+        return
       end
 
-      self.add_connection seed, socket
-      return
+      # self.add_connection seed, socket
+      # return
     end
 
     raise ConnectionError.new "Could not connect to a seed"
   end
 
-  private def add_connection(ip : Socket::IPAddress, socket : TCPSocket)
-    @controller.add_connection ip, socket
-  end
+  # private def add_connection(ip : Socket::IPAddress, socket : TCPSocket)
+  #   @controller.add_connection ip, socket
+  # end
 
   private def listen(port = 1280)
     server = TCPServer.new "0.0.0.0", port
@@ -32,6 +35,8 @@ class Chord
 
   def handle_connection(client)
     @controller.add_connection client.remote_address, client
+
+    @finger_table.insert(client.remote_address)
 
     if self.is_seed?
       # If the current node is a seed node, supply

@@ -1,14 +1,15 @@
 require "../utils/timer"
 
 class Chord
-  def route(packet : Message::ChordPacket, *, hash : StoreKey)
+  def route(packet : Message::ChordPacket, *, key : String)
     response_chan = @channels.make_response_chan(packet.uid)
+    key_hash = CHash.digest_pair(key)
 
-    self.route_once(packet, hash: hash)
+    self.route_once(packet, hash: key_hash)
 
     awaiter = Timer::Awaiter(Message::Packet).new response_chan
     awaiter.on_timeout do
-      self.route_once(packet, hash: hash)
+      self.route_once(packet, hash: key_hash)
     end
 
     awaiter

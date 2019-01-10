@@ -1,5 +1,5 @@
 class Chord
-  alias StoreKey = {UInt64, String}
+  alias StoreKey = {hash: UInt64, value: String}
   alias Entry = {String, UInt64}
 
   class Store < Hash(StoreKey, Entry)
