@@ -10,6 +10,7 @@ class Chord
     PredRequest
     PredResponse
     PredNotification
+    PredNotifResponse
     SetResponse
     GetResponse
     ReplicaRequest
@@ -26,6 +27,7 @@ class Chord
       when .set_response? then Chord::SetResponse
       when .get_response? then Chord::GetResponse
       when .pred_notification? then Chord::PredNotification
+      when .pred_notif_response? then Chord::PredNotifResponse
       when .replica_request? then Chord::ReplicaRequest
       end
     end
@@ -116,6 +118,22 @@ class Chord
 
   struct PredNotification < Command
     Serializable.with_kind :pred_notification
+
+    getter pred_of_pred : NodeHash?
+    getter pred_id : NodeHash
+    getter keys : Array(Tuple(StoreKey, StoreEntry))
+
+    def initialize(@pred_id : NodeHash, @pred_of_pred : NodeHash?, @keys : Array(Tuple(StoreKey, StoreEntry)))
+    end
+  end
+
+  struct PredNotifResponse < Command
+    Serializable.with_kind :pred_notif_response
+
+    getter keys : Array({StoreKey, StoreEntry})
+
+    def initialize(@keys : Array({StoreKey, StoreEntry}))
+    end
   end
 
   struct ReplicaRequest < Command

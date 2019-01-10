@@ -4,6 +4,20 @@ require "../utils/ip"
 class Chord
   # Polling interval for stabilization protocol
   SFREQ = 300.milliseconds
+  @contacted = Set(String).new
+  @contacted_mux = Mutex.new
+
+  private def contacted?(ip : String)
+    @contacted_mux.synchronize do
+      @contacted.includes?(ip)
+    end
+  end
+
+  private def mark_as_contacted(ip : String)
+    @contacted_mux.synchronize do
+      @contacted.add(ip)
+    end
+  end
 
   def stabilize
     ticker = Timer.tick(SFREQ)
@@ -34,7 +48,7 @@ class Chord
         if command.is_a?(PredecessorResponse)
           pred_hash = CHash.digest_pair(command.predecessor.to_s)
           self.update_successor(pred_hash, successor.not_nil!)
-          # self.notify_successor
+          self.notify_successor
         end
       end
     end
@@ -53,6 +67,34 @@ class Chord
           @finger_table.insert(predecessor)
         end
       end
+    end
+  end
+
+  private def notify_successor
+    if successor = @finger_table.successor
+      successor_ip = parse_ip(successor)
+      predecessor = self.predecessor
+      keys = [] of Tuple(StoreKey, StoreEntry)
+
+      have_contacted = self.contacted?(successor_ip.to_s)
+
+      if predecessor && !have_contacted
+        keys = @store.entries_in_range(predecessor, successor)
+      end
+
+      pred_notification = PredNotification.new(@local_hash, predecessor, keys)
+      packet = Message::ChordPacket.from_command(pred_notification, @local_hash)
+
+      @controller.dispatch(successor_ip, packet) do |response|
+        case inner_cmd = response.command
+        when PredNotifResponse
+          if !have_contacted
+            @store.add_all(inner_cmd.keys)
+          end
+        end
+      end
+
+      self.mark_as_contacted(successor_ip.to_s)
     end
   end
 end

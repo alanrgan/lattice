@@ -61,8 +61,6 @@ class Chord
           self.process_get(command, packet.origin, packet.uid, &route_proc)
         when SetCommand
           self.process_set(command, origin, packet.uid, &route_proc)
-        when ListLocalCommand
-          self.process_list_local(command)
         when PredecessorRequest
           response = if predecessor = self.predecessor
             PredecessorResponse.new(parse_ip(predecessor))
@@ -110,7 +108,4 @@ class Chord
     end
   end
 
-  private def process_list_local(command : Chord::ListLocalCommand)
-
-  end
 end
