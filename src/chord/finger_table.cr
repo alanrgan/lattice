@@ -1,14 +1,14 @@
 class Chord::FingerTable
   @mux = Mutex.new
   @table = StaticArray(NodeHash, Chord::M).new({hash: 0_u64, value: ""})
-  @size = 0_u8
+  @populated = false
 
   def initialize(@local_hash : NodeHash)
   end
 
-  def size
+  def populated?
     @mux.synchronize do
-      @size
+      @populated
     end
   end
 
@@ -33,6 +33,8 @@ class Chord::FingerTable
         hashed_ips[idx]
       end
     end
+
+    @populated = true
   end
 
   def insert(ip : Socket::IPAddress)
@@ -47,15 +49,15 @@ class Chord::FingerTable
         cond = CHash.hash_dist(n, ft_hash) < CHash.hash_dist(n, entry[:hash])
         unless ft_hash != 0 && cond
           @table[i] = entry
-          @size += 1
         end
       end
+      @populated = true
     end
   end
 
   # Find the node whose hash is closest to that of the provided node, rounded down
   def lookup(node_id : NodeHash)
-    if self.size == 0
+    unless @populated
       @local_hash
     else
       @mux.synchronize do

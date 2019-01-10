@@ -10,6 +10,9 @@ class Chord
   @local_hash : NodeHash
   @controller : Controller
   @finger_table : FingerTable
+  @predecessor : NodeHash?
+  @pred_mux = Mutex.new
+  @is_seed : Bool?
 
   getter channels : ChannelBundle = ChannelBundle.instance
   getter store = Store.new
@@ -32,7 +35,7 @@ class Chord
     spawn self.listen @local_ip.port
     
     # Attempt to connect to a seed
-    self.dial_seeds
+    self.dial_seeds unless self.is_seed?
 
     # Start stabilization protocol
     quit_stabilization = self.stabilize
@@ -52,7 +55,18 @@ class Chord
       chord_packet = Message::Packet.deserialize_as Message::ChordPacket, message.data
       puts "got chord packet, #{chord_packet}"
       @channels.send(chord_packet)
-      # # puts message.data
+    end
+  end
+
+  def predecessor
+    @pred_mux.synchronize do
+      @predecessor
+    end
+  end
+
+  def set_predecessor(pred : NodeHash)
+    @pred_mux.synchronize do
+      @predecessor = pred
     end
   end
 

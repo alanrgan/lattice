@@ -5,6 +5,7 @@ require "uuid"
 require "./*"
 require "../../converters"
 require "../../utils/serializable"
+require "../../utils/ip"
 require "../command"
 
 module Chord::Message
@@ -34,7 +35,7 @@ module Chord::Message
     end
 
     def initialize(addr : String)
-      @addr = Socket::IPAddress.parse "ip://#{addr}"
+      @addr = parse_ip(addr)
     end
   end
 
@@ -54,10 +55,10 @@ module Chord::Message
     getter? is_response = false
     getter uid
     getter type
+    getter origin
 
     def initialize(@type : String, @uid : String, @origin : NodeHash, @command : String, *, @is_response = false)
     end
-
 
     def self.from_command(command : Chord::Command, origin : NodeHash)
       uid = UUID.random.to_s

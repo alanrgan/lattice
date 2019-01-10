@@ -1,19 +1,15 @@
 class Chord::Controller
-  def broadcast(packet : Message::Packet)
-    @out_channel.send packet
-    if callback = @message_callback
-      callback.call Message::Base.new(packet)
-    end
-  end
-
   def dispatch(ip : Socket::IPAddress, packet : Message::Packet)
     @fail_mux.synchronize do
-      if !@connected_ips.includes? ip
+      if ip != @local_ip && !@connected_ips.includes? ip
         return
       end
     end
 
     if ip == @local_ip
+      if callback = @message_callback
+        callback.call Message::Base.new(packet)
+      end
     else
       @dispatcher.send_or(ip, packet) do
         self.mark_as_failed ip

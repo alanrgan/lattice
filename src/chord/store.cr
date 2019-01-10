@@ -26,6 +26,10 @@ class Chord
       end
     end
 
+    def []=(key : StoreKey, value : String)
+      self[key] = {value, 0_u64}
+    end
+
     def []=(key : String, value : String)
       key_hash = CHash.digest_pair(key)
       self[key_hash] = {value, 0_u64}

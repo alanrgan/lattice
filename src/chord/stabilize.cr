@@ -1,4 +1,5 @@
 require "../utils/timer"
+require "../utils/ip"
 
 class Chord
   # Polling interval for stabilization protocol
@@ -25,7 +26,7 @@ class Chord
   # Ask successor node who its predecessor is
   private def query_predecessor
     if successor = @finger_table.successor
-      successor_ip = Socket::IPAddress.parse("ip://#{successor[:value]}")
+      successor_ip = parse_ip(successor)
       pred_request = PredecessorRequest.new
       pred_packet = self.packet_from_command(pred_request)
       @controller.dispatch(successor_ip, pred_packet) do |response|
@@ -39,9 +40,10 @@ class Chord
     end
   end
 
-  private def update_successor(predecessor : NodeHash, successor : NodeHash)
-    if predecessor != @local_hash && CHash.in_range?(predecessor, head: @local_hash, tail: successor)
-      pred_ip = Socket::IPAddress.parse("ip://#{predecessor[:value]}")
+  private def update_successor(predecessor : NodeHash?, successor : NodeHash)
+    if predecessor.nil?
+    elsif predecessor != @local_hash && CHash.in_range?(predecessor, head: @local_hash, tail: successor)
+      pred_ip = parse_ip(predecessor)
 
       unless @controller.is_connected?(pred_ip)
         begin
