@@ -7,7 +7,7 @@ class Chord
 
     self.route_once(packet, hash: key_hash)
 
-    awaiter = Timer::Awaiter(Message::Packet).new response_chan
+    awaiter = Timer::Awaiter(Message::ChordPacket).new response_chan
     awaiter.on_timeout do
       self.route_once(packet, hash: key_hash)
     end

@@ -26,8 +26,8 @@ class Chord::Controller
   def dial(ip : Socket::IPAddress)
     begin
       socket = TCPSocket.new ip.address,
-                            ip.port, 
-                            connect_timeout: Chord::CONN_TIMEOUT_SECONDS
+                             ip.port, 
+                             connect_timeout: Chord::CONN_TIMEOUT_SECONDS
     rescue ex
       yield ex
       return
@@ -44,7 +44,9 @@ class Chord::Controller
   end
 
   def is_connected?(ip : Socket::IPAddress)
-    @connected_ips.includes? ip
+    @fail_mux.synchronize do
+      @connected_ips.includes? ip
+    end
   end
 
   def on_failure(&block : Socket::IPAddress ->)

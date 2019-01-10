@@ -1,7 +1,7 @@
 class Chord
   class ChannelBundle
     @@instance = new
-    @response_channels = Hash(String, Channel(Message::Packet)).new
+    @response_channels = Hash(String, Channel(Message::ChordPacket)).new
     @incoming_chan = Channel(Message::ChordPacket).new
     @mux = Mutex.new
 
@@ -22,7 +22,7 @@ class Chord
 
     def make_response_chan(uid : String)
       @mux.synchronize do
-        chan = Channel(Message::Packet).new
+        chan = Channel(Message::ChordPacket).new
         @response_channels[uid] = chan
         chan
       end

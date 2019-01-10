@@ -24,22 +24,33 @@ class Chord
 
   # Ask successor node who its predecessor is
   private def query_predecessor
-    # if successor = self.successor
-    #   predecessor_request = PredecessorRequest.new
-    #   @controller.dispatch(successor.ip, predecessor_request) do |response|
-    #     if response.is_a?(Response::Predecessor)
-    #       self.update_predecessor(response.predecessor, successor)
-    #       self.notify_successor
-    #     end
-    #   end
-    # end
-    get_cmd = GetCommand.new "hello"
-    packet = Message::ChordPacket.from_command(get_cmd, @local_hash)
+    if successor = @finger_table.successor
+      successor_ip = Socket::IPAddress.parse("ip://#{successor[:value]}")
+      pred_request = PredecessorRequest.new
+      pred_packet = self.packet_from_command(pred_request)
+      @controller.dispatch(successor_ip, pred_packet) do |response|
+        command = response.command
+        if command.is_a?(PredecessorResponse)
+          pred_hash = CHash.digest_pair(command.predecessor.to_s)
+          self.update_successor(pred_hash, successor.not_nil!)
+          # self.notify_successor
+        end
+      end
+    end
+  end
 
-    # @controller.connected_ips.each do |ip|
-    #   @controller.dispatch ip, packet do
-    #     puts "got response"
-    #   end
-    # end
+  private def update_successor(predecessor : NodeHash, successor : NodeHash)
+    if predecessor != @local_hash && CHash.in_range?(predecessor, head: @local_hash, tail: successor)
+      pred_ip = Socket::IPAddress.parse("ip://#{predecessor[:value]}")
+
+      unless @controller.is_connected?(pred_ip)
+        begin
+          @controller.dial(pred_ip)
+        rescue
+        else
+          @finger_table.insert(predecessor)
+        end
+      end
+    end
   end
 end

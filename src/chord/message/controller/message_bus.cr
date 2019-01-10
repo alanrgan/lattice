@@ -21,17 +21,17 @@ class Chord::Controller
     end
   end
 
-  def dispatch(ip : Socket::IPAddress, packet : Message::ChordPacket, concurrent = true, &block : Message::Packet ->)
+  def dispatch(ip : Socket::IPAddress, packet : Message::ChordPacket, concurrent = true, &block : Message::ChordPacket ->)
     ChannelBundle.instance.make_response_chan(packet.uid)
     self.dispatch(ip, packet)
     Controller.await_response(packet, concurrent, &block)
   end
 
-  def dispatch_and_wait(ip : Socket::IPAddress, packet : Message::ChordPacket, &block : Message::Packet ->)
+  def dispatch_and_wait(ip : Socket::IPAddress, packet : Message::ChordPacket, &block : Message::ChordPacket ->)
     self.dispatch(ip, packet, concurrent: false, &block)
   end
 
-  macro await_response(packet, concurrent = true, &block : Message::Packet ->)
+  macro await_response(packet, concurrent = true, &block : Message::ChordPacket ->)
     {% if concurrent %}
     spawn do
     {% end %}
