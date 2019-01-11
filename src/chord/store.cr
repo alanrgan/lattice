@@ -26,7 +26,6 @@ class Chord
       unless @kvmap.has_key?(key)
         @kvmap[key] = {value, 0_u64}
         @mux.unlock
-        0_64
       else
         current_count = @kvmap[key][1]
         @mux.unlock
@@ -46,7 +45,7 @@ class Chord
     def update(entry : Tuple(StoreKey, StoreEntry))
       @mux.synchronize do
         key, value = entry
-        own_entry = @kvmap[key]
+        own_entry = @kvmap[key]?
         if !own_entry
           @kvmap[key] = value
         elsif own_entry[1] <= value[1] && own_entry[0] != value[0]

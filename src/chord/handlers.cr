@@ -72,7 +72,6 @@ class Chord
         when OwnersCommand
           self.process_owners(command, packet.origin, packet.uid, &route_proc)
         when PredecessorRequest
-          # puts "Got predecessor request #{command} from origin #{origin}"
           response = if predecessor = self.predecessor
             PredecessorResponse.new(parse_ip(predecessor))
           else
@@ -80,10 +79,8 @@ class Chord
           end
 
           response_packet = response.as_response(packet.uid, @local_hash)
-          # puts "Sending pred response to #{origin}"
           @controller.dispatch(origin, response_packet)
         when PredNotification
-          # puts "Got Pred Notif"
           curr_predecessor = self.predecessor
           predecessor = command.pred_id
           @store.add_all(command.keys)
@@ -105,8 +102,6 @@ class Chord
           else
             false
           end
-
-          # puts "Got pred notif, curr_pred is #{curr_predecessor}, recvd pred is #{predecessor}"
 
           if !curr_predecessor || should_update
             self.set_predecessor(predecessor)
@@ -170,6 +165,8 @@ class Chord
 
       response = OwnersResponse.new(owners).as_response(uid, @local_hash)
       self.route(response, key: origin)
+    else
+      block.call(key)
     end
   end
 

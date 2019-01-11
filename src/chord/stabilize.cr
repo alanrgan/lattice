@@ -88,7 +88,6 @@ class Chord
 
       pred_notification = PredNotification.new(@local_hash, predecessor, keys)
       packet = self.packet_from_command(pred_notification)
-      #Message::ChordPacket.from_command(pred_notification, @local_hash)
       # puts "Notifying successor, #{successor_ip} with packet: #{packet}"
 
       @controller.dispatch(successor_ip, packet) do |response|

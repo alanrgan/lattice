@@ -29,11 +29,11 @@ class Chord
     #   hash_dist(15, 20) < hash_dist(15, 12)
     #   i.e. 20 is closer to 15 than 12 is to 15
     #   to take into account the circularity of the chord hash space
-    def hash_dist(a : UInt64, b : UInt64)
+    def hash_dist(a : UInt64, b : UInt64) : UInt64
       if b < a
-        (1 << (Chord::M-1))+b-a+1
+        ((1_u64 << M) - 1)+b-a+1_u64
       else
-        (b-a) & (1 << (M-1))
+        (b-a) & ((1_u64 << M) - 1)
       end
     end
 
@@ -44,7 +44,7 @@ class Chord
     def in_range?(node : NodeHash, *, head : NodeHash, tail : NodeHash)
       interval_dist = hash_dist(head, tail)
       head_to_node_dist = hash_dist(head, node)
-      head_to_node_dist != 0 && head_to_node_dist <= interval_dist
+      head_to_node_dist != 0_u64 && head_to_node_dist <= interval_dist
     end
   end
 end

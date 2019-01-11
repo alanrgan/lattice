@@ -29,7 +29,7 @@ class Chord
     elsif (successor = @finger_table.successor)
       if CHash.in_range?(hash, head: @local_hash, tail: successor)
         successor_ip = parse_ip(successor)
-        puts "Belongs to successor, routing #{packet} to #{successor_ip}"
+        # puts "Belongs to successor, routing #{packet} to #{successor_ip}"
         @controller.dispatch(successor_ip, packet)
       else
         closest_predecessor = @finger_table.lookup(hash)
@@ -38,14 +38,9 @@ class Chord
         forward_command = ForwardCommand.new(hash, packet)
         chord_packet = self.packet_from_command(forward_command)
 
-        puts "Forwarding from #{@local_hash} to node in FTable: #{closest_predecessor_ip}, packet: #{chord_packet}"
-        if predecessor.nil?
-          puts "In here because predecessor is nil"
-        end
+        # puts "Forwarding from #{@local_hash} to node in FTable: #{closest_predecessor_ip}, packet: #{chord_packet}"
         @controller.dispatch(closest_predecessor_ip, chord_packet)
       end
-    else
-      puts "none of the other reqs are satisfied"
     end
   end
 end

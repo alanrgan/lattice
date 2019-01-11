@@ -16,12 +16,12 @@ class Chord::FingerTable
     hashed_ips = ips.map { |ip| CHash.digest_pair(ip.to_s) }
     hashed_ips.sort_by! { |hashed_ip| hashed_ip[:hash] }
 
-    puts "Hashed ips are #{hashed_ips}"
+    # puts "Hashed ips are #{hashed_ips}"
     l = hashed_ips.size
 
     (0...Chord::M).each do |k|
       # take (@local_hash) + 2^k) % 2^M to achieve circularity property
-      n = (@local_hash[:hash] + (1_u64 << k.to_u64)) & (1_u64 << (Chord::M-1))
+      n = (@local_hash[:hash] + (1_u64 << k.to_u64)) & ((1_u64 << Chord::M) - 1)
       # Find the index of the first element whose hash is greater than or
       # equal to n
       idx = (0...l).bsearch { |i| hashed_ips[i][:hash] >= n } || 0
@@ -45,7 +45,7 @@ class Chord::FingerTable
     @mux.synchronize do
       (0...Chord::M).each do |i|
         ft_hash = @table[i][:hash]
-        n = (@local_hash[:hash] + (1_u64 << i.to_u64)) & (1_u64 << (Chord::M - 1))
+        n = (@local_hash[:hash] + (1_u64 << i.to_u64)) & ((1_u64 << Chord::M) - 1)
         cond = CHash.hash_dist(n, ft_hash) < CHash.hash_dist(n, entry[:hash])
         unless ft_hash != 0 && cond
           @table[i] = entry

@@ -8,3 +8,6 @@ build:
 
 run:
 	docker-compose up -d && docker attach lattice_seed_1
+
+stop:
+	docker ps -aq | xargs docker stop

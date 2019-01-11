@@ -17,7 +17,6 @@ services:
       static-network:
         ipv4_address: 172.20.128.3
     tty: true
-    stdin_open: true
     depends_on:
       - seed
   client_two:
