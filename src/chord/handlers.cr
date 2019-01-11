@@ -83,7 +83,7 @@ class Chord
           # puts "Sending pred response to #{origin}"
           @controller.dispatch(origin, response_packet)
         when PredNotification
-          puts "Got Pred Notif"
+          # puts "Got Pred Notif"
           curr_predecessor = self.predecessor
           predecessor = command.pred_id
           @store.add_all(command.keys)

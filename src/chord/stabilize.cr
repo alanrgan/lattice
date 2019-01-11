@@ -49,7 +49,7 @@ class Chord
         command = response.command
         if command.is_a?(PredecessorResponse)
           # puts "got pred response #{command}"
-          pred_hash = CHash.digest_pair(command.predecessor.to_s)
+          pred_hash = CHash.digest_pair(command.predecessor.to_s) if command.predecessor
           self.update_successor(pred_hash, successor.not_nil!)
           self.notify_successor
         end
@@ -60,6 +60,7 @@ class Chord
   private def update_successor(predecessor : NodeHash?, successor : NodeHash)
     if predecessor.nil?
     elsif predecessor != @local_hash && CHash.in_range?(predecessor, head: @local_hash, tail: successor)
+      # puts "parsing predecessor #{predecessor}"
       pred_ip = parse_ip(predecessor)
 
       unless @controller.is_connected?(pred_ip)
@@ -88,7 +89,7 @@ class Chord
       pred_notification = PredNotification.new(@local_hash, predecessor, keys)
       packet = self.packet_from_command(pred_notification)
       #Message::ChordPacket.from_command(pred_notification, @local_hash)
-      # puts "Notifying successor: #{packet}"
+      # puts "Notifying successor, #{successor_ip} with packet: #{packet}"
 
       @controller.dispatch(successor_ip, packet) do |response|
         case inner_cmd = response.command

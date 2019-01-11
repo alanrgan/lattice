@@ -45,7 +45,7 @@ class Chord::FingerTable
     @mux.synchronize do
       (0...Chord::M).each do |i|
         ft_hash = @table[i][:hash]
-        n = (@local_hash[:hash] + (1 << i.to_u64)) & (1 << (Chord::M - 1))
+        n = (@local_hash[:hash] + (1_u64 << i.to_u64)) & (1_u64 << (Chord::M - 1))
         cond = CHash.hash_dist(n, ft_hash) < CHash.hash_dist(n, entry[:hash])
         unless ft_hash != 0 && cond
           @table[i] = entry
