@@ -7,6 +7,9 @@ class Chord
     self.route(packet, key: key_hash)
   end
 
+  # Route a packet through the network to the node that owns the specified key.
+  # Returns an Awaiter object, which can be used to poll for a response and
+  # specify a retry interval.
   def route(packet : Message::ChordPacket, *, key : NodeHash)
     response_chan = @channels.make_response_chan(packet.uid)
 
@@ -20,6 +23,7 @@ class Chord
     awaiter
   end
 
+  # Route a packet to the next closest node in the finger table or to self
   def route_once(packet : Message::ChordPacket, *, hash : StoreKey)
     predecessor = self.predecessor
     belongs_to_self = !predecessor.nil? && CHash.in_range?(hash, head: predecessor, tail: @local_hash)

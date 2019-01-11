@@ -19,6 +19,7 @@ class Chord
     end
   end
 
+  # Run the Chord stabilization protocol for nodes joining and failing
   def stabilize
     ticker = Timer.tick(SFREQ)
     quit_chan = Channel(Nil).new

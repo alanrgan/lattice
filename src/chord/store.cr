@@ -1,11 +1,15 @@
 class Chord
+  # Named tuple representing a key, as a string and as a hashed uint64
   alias StoreKey = {hash: UInt64, value: String}
+  # Tuple whose first entry is the value and the second entry is a
+  # counter indicating how many times the value was overwritten
   alias StoreEntry = Tuple(String, UInt64)
 
   class Store
     @mux = Mutex.new
     @kvmap = Hash(StoreKey, StoreEntry).new
-
+    
+    # Synchronized get. Returns nil if key is not found
     def [](key : StoreKey)
       @mux.synchronize do
         @kvmap[key]?
@@ -42,6 +46,9 @@ class Chord
       @kvmap.each_key(&block)
     end
 
+    # Update the key with the specified value only if the
+    # update request is not stale (i.e. an update with a higher counter
+    # value is received)
     def update(entry : Tuple(StoreKey, StoreEntry))
       @mux.synchronize do
         key, value = entry
@@ -66,13 +73,16 @@ class Chord
       entries
     end
 
+    # Remove local entries whose keys fall in the specified range
     def clip_range(head : NodeHash, tail : NodeHash)
       @mux.synchronize do
         @kvmap.delete_if { |key, _| CHash.in_range?(key, head: head, tail: tail) }
       end
     end
 
+    # Remove all local entries whose keys do not fall in the specified range
     def clamp_to_range(head : NodeHash, tail : NodeHash)
+      # Ignore successive clamp requests
       unless @prev_clamp_range == {head, tail}
         @prev_clamp_range = {head, tail}
         self.clip_range(head, tail)
