@@ -39,13 +39,16 @@ class Chord
 
   # Ask successor node who its predecessor is
   private def query_predecessor
+    # puts "querying predecessor"
     if successor = @finger_table.successor
       successor_ip = parse_ip(successor)
       pred_request = PredecessorRequest.new
       pred_packet = self.packet_from_command(pred_request)
+      # puts "Sending pred request to #{successor_ip}"
       @controller.dispatch(successor_ip, pred_packet) do |response|
         command = response.command
         if command.is_a?(PredecessorResponse)
+          # puts "got pred response #{command}"
           pred_hash = CHash.digest_pair(command.predecessor.to_s)
           self.update_successor(pred_hash, successor.not_nil!)
           self.notify_successor
@@ -83,7 +86,9 @@ class Chord
       end
 
       pred_notification = PredNotification.new(@local_hash, predecessor, keys)
-      packet = Message::ChordPacket.from_command(pred_notification, @local_hash)
+      packet = self.packet_from_command(pred_notification)
+      #Message::ChordPacket.from_command(pred_notification, @local_hash)
+      # puts "Notifying successor: #{packet}"
 
       @controller.dispatch(successor_ip, packet) do |response|
         case inner_cmd = response.command

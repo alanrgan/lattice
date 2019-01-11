@@ -6,6 +6,7 @@ class Chord
   enum CommandType
     Set
     Get
+    Owners
     ListLocal
     PredRequest
     PredResponse
@@ -13,6 +14,7 @@ class Chord
     PredNotifResponse
     SetResponse
     GetResponse
+    OwnersResponse
     ReplicaRequest
     Forward
 
@@ -29,11 +31,14 @@ class Chord
       when .pred_notification? then Chord::PredNotification
       when .pred_notif_response? then Chord::PredNotifResponse
       when .replica_request? then Chord::ReplicaRequest
+      when .owners? then OwnersCommand
+      when .owners_response? then Chord::OwnersResponse
       end
     end
 
     def is_response?
-      self.pred_response?
+      self.pred_response? || self.get_response? \
+      || self.set_response? || self.pred_notif_response? || self.owners_response?
     end
   end
 
@@ -89,6 +94,24 @@ class Chord
     end
   end
 
+  struct OwnersCommand < Command
+    Serializable.with_kind :owners
+
+    getter key : String
+
+    def initialize(@key : String)
+    end
+  end
+
+  struct OwnersResponse < Command
+    Serializable.with_kind :owners_response
+
+    getter nodes : Array(NodeHash)
+
+    def initialize(@nodes : Array(NodeHash))
+    end
+  end
+
   struct ListLocalCommand < Command
     Serializable.with_kind :list_local
 
@@ -138,6 +161,12 @@ class Chord
 
   struct ReplicaRequest < Command
     Serializable.with_kind :replica_request
+
+    getter key : StoreKey
+    getter value : StoreEntry
+
+    def initialize(@key : StoreKey, @value : StoreEntry)
+    end
   end
 
   struct ForwardCommand < Command

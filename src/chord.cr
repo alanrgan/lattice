@@ -21,6 +21,7 @@ class Chord
   end
 
   def initialize(@local_ip : Socket::IPAddress, @seeds : Array(Socket::IPAddress))
+    # Need to ignore port when evaluating hash
     ip_str = @local_ip.to_s
     @local_hash = {hash: CHash.digest(ip_str), value: ip_str}
 
@@ -42,10 +43,13 @@ class Chord
   end
 
   def notify_failure(ip : Socket::IPAddress)
-    puts "ip #{ip} failed"
+    hashed_ip = CHash.digest_pair(ip.to_s)
+    successor = self.successor_of(ip)
+    @finger_table.replace_all(hashed_ip, successor)
   end
 
   def handle_message(message : Message::Base)
+    # puts "got message: #{message}"
     case message.packet_type
     when .net_stat?
       net_stat = Message::Packet.deserialize_as Message::NetStat, message.data
@@ -53,7 +57,6 @@ class Chord
       @controller.dial(net_stat.ip_addresses)
     when .chord_packet?
       chord_packet = Message::Packet.deserialize_as Message::ChordPacket, message.data
-      puts "got chord packet, #{chord_packet}"
       @channels.send(chord_packet)
     end
   end
@@ -70,27 +73,18 @@ class Chord
     end
   end
 
-  # For testing purposes only
-  def run
-    # ip_addrs = ["127.0.0.1:80", "0.0.0.0:12345"].map do |addr|
-    #   Socket::IPAddress.parse "ip://#{addr}"
-    # end
-  
-    # packet = Message::NetStat.new(ip_addrs)
-    get_cmd = Chord::GetCommand.new "hello"
-    packet = Message::ChordPacket.from_command(get_cmd, @local_hash)
-
-    response_packet = Message::ChordPacket.new("get_response", packet.uid, @local_hash, "hi", is_response: true)
-
-    @controller.connected_ips.each do |ip|
-      @controller.dispatch ip, packet do |response|
-        puts "Got response: #{response}"
+  def successor_of(ip : Socket::IPAddress)
+    hashed_ips = @controller.connected_ips.map { |addr| CHash.digest_pair(addr.to_s) } << @local_hash
+    hashed_ips.sort_by! &.[:hash]
+    node = CHash.digest_pair(ip.to_s)
+    
+    hashed_ips.each do |other_node|
+      if other_node[:hash] > node[:hash]
+        return other_node
       end
-      @controller.dispatch ip, response_packet
     end
-    # @controller.broadcast packet
-    loop do
-      @controller.read
-    end
+
+    hashed_ips[0]
   end
+
 end

@@ -1,9 +1,7 @@
 class Chord::Controller
   def dispatch(ip : Socket::IPAddress, packet : Message::Packet)
-    @fail_mux.synchronize do
-      if ip != @local_ip && !@connected_ips.includes? ip
-        return
-      end
+    if ip != @local_ip && !self.connected_ips.includes? ip
+      return
     end
 
     if ip == @local_ip
@@ -41,16 +39,18 @@ class Chord::Controller
   private def handle_outgoing_messages
     loop do
       message = @out_channel.receive
-      @connected_ips.each do |ip|
+      self.connected_ips.each do |ip|
         self.dispatch ip, message
       end
     end
   end
 
   private def handle_incoming_messages(ip : Socket::IPAddress, socket : TCPSocket)
+    # puts "In handle_incoming_messages fn for #{ip}"
     loop do
+      # puts "waiting for message from #{ip}"
       message = socket.gets
-
+      # puts "Got message from #{ip}: #{message}"
       # Handle socket disconnect
       if message.nil?
         puts "Failed"

@@ -1,10 +1,11 @@
 require "./controller/*"
+require "../../utils/ip"
 
 class Chord::Controller
   @fail_mux = Mutex.new
   @fail_channel = Channel(Socket::IPAddress).new
   @out_channel = Channel(Message::Packet).new
-  getter connected_ips = Set(Socket::IPAddress).new
+  @connected_ips = Set(Socket::IPAddress).new
 
   @dispatcher = Dispatcher.new
 
@@ -13,9 +14,18 @@ class Chord::Controller
     spawn self.handle_outgoing_messages
   end
 
+  def connected_ips
+    @fail_mux.synchronize do
+      @connected_ips
+    end
+  end
+
   def dial(ips : Array(Socket::IPAddress))
+    connected_ips = self.connected_ips
     ips.each do |ip|
-      self.dial(ip) { |_| nil }
+      unless connected_ips.includes?(ip)
+        self.dial(ip) { |ex| puts(ex) }
+      end
     end
   end
 
@@ -36,10 +46,12 @@ class Chord::Controller
   end
 
   def add_connection(addr, socket)
+    # puts "Adding connection #{addr}, #{socket}"
     @fail_mux.synchronize do
       @connected_ips.add addr
       @dispatcher.add_connection addr, socket
     end
+    # puts "Handling incoming messages from #{addr}"
     spawn self.handle_incoming_messages(addr, socket)
   end
 

@@ -1,4 +1,5 @@
 require "yaml"
+require "../utils/ip"
 
 struct Config
   struct Host
@@ -7,7 +8,7 @@ struct Config
     getter port : Int32
 
     def to_ip
-      Socket::IPAddress.parse "ip://#{address}:#{port}"
+      Socket::IPAddress.parse "ip://#{address}:#{PORT}"
     end
   end
 end

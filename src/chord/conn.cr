@@ -1,13 +1,26 @@
+require "../utils/ip"
+
 class Chord
-  CONN_TIMEOUT_SECONDS = 0.3
+  CONN_TIMEOUT_SECONDS = 1
 
   def dial_seeds
-    @seeds.each do |seed|
-      begin
-        @controller.dial(seed)
-      rescue
-        next
-      else
+    connected_seed = nil
+
+    # Cycle through seeds 5 times with timeout until
+    # the node manages to connect to one
+    10.times do
+      @seeds.each do |seed|
+        begin
+          @controller.dial(seed)
+        rescue
+          next
+        else
+          connected_seed = seed
+          break
+        end
+      end
+      
+      if connected_seed
         return
       end
     end
@@ -24,9 +37,10 @@ class Chord
   end
 
   def handle_connection(client)
-    @controller.add_connection client.remote_address, client
+    remote_ip = Socket::IPAddress.new(client.remote_address.address, PORT)
+    @controller.add_connection remote_ip, client
 
-    @finger_table.insert(client.remote_address)
+    @finger_table.insert(remote_ip)
 
     if self.is_seed?
       # If the current node is a seed node, supply
@@ -35,7 +49,7 @@ class Chord
 
       net_state = Message::NetStat.new ips_on_network
       
-      @controller.dispatch client.remote_address, net_state
+      @controller.dispatch remote_ip, net_state
     end
   end
 

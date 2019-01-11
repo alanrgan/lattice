@@ -1,0 +1,8 @@
+local:
+  address: 172.20.128.5
+  port: 1225
+
+known_hosts:
+  - { address: 172.20.128.2, port: 1225 }
+  - { address: 192.168.1.201, port: 3333 }
+  - { address: 192.168.1.201, port: 1280 }

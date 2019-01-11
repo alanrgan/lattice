@@ -38,7 +38,10 @@ class Chord
         forward_command = ForwardCommand.new(hash, packet)
         chord_packet = self.packet_from_command(forward_command)
 
-        puts "Forwarding to node in FTable: #{closest_predecessor_ip}, packet: #{chord_packet}"
+        puts "Forwarding from #{@local_hash} to node in FTable: #{closest_predecessor_ip}, packet: #{chord_packet}"
+        if predecessor.nil?
+          puts "In here because predecessor is nil"
+        end
         @controller.dispatch(closest_predecessor_ip, chord_packet)
       end
     else

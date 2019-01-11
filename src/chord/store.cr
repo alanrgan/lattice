@@ -67,6 +67,19 @@ class Chord
       entries
     end
 
+    def clip_range(head : NodeHash, tail : NodeHash)
+      @mux.synchronize do
+        @kvmap.delete_if { |key, _| CHash.in_range?(key, head: head, tail: tail) }
+      end
+    end
+
+    def clamp_to_range(head : NodeHash, tail : NodeHash)
+      unless @prev_clamp_range == {head, tail}
+        @prev_clamp_range = {head, tail}
+        self.clip_range(head, tail)
+      end
+    end
+
     def add_all(entries : Array({StoreKey, StoreEntry}))
       @mux.synchronize do  
         entries.each do |entry|

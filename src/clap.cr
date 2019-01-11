@@ -19,6 +19,10 @@ module Clap
         self.expect(argv, 2, exc: "Usage: GET <key>") do
           Chord::GetCommand.new(key: argv[1])
         end
+      when "OWNERS"
+        self.expect(argv, 2, exc: "Usage: OWNERS <key>") do
+          Chord::OwnersCommand.new(key: argv[1])
+        end
       when "LIST_LOCAL"
         self.expect(argv, 1, exc: "Usage: LIST_LOCAL") do
           Chord::ListLocalCommand.new

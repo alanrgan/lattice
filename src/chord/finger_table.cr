@@ -16,6 +16,7 @@ class Chord::FingerTable
     hashed_ips = ips.map { |ip| CHash.digest_pair(ip.to_s) }
     hashed_ips.sort_by! { |hashed_ip| hashed_ip[:hash] }
 
+    puts "Hashed ips are #{hashed_ips}"
     l = hashed_ips.size
 
     (0...Chord::M).each do |k|
@@ -23,8 +24,7 @@ class Chord::FingerTable
       n = (@local_hash[:hash] + (1_u64 << k.to_u64)) & (1_u64 << (Chord::M-1))
       # Find the index of the first element whose hash is greater than or
       # equal to n
-      idx = (0...l).bsearch { |i| hashed_ips[i][:hash] >= n }.not_nil!
-      idx %= l
+      idx = (0...l).bsearch { |i| hashed_ips[i][:hash] >= n } || 0
       
       # Do not allow a node to have itself in its finger table
       @table[k] = if hashed_ips[idx] == @local_hash
@@ -83,12 +83,11 @@ class Chord::FingerTable
     end
   end
 
-  def replace_all(key : String, replace_with : String)
-    repl_hash = CHash.digest_pair(replace_with)
+  def replace_all(key : NodeHash, replace_with : NodeHash)
     @mux.synchronize do
       @table.each_with_index do |entry, i|
-        if entry[1] == key
-          @table[i] = repl_hash
+        if entry == key
+          @table[i] = replace_with
         end
       end
     end

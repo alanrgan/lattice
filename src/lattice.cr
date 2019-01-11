@@ -1,6 +1,7 @@
 require "./chord"
 require "./config"
 require "./clap"
+require "./utils/ip"
 
 require "option_parser"
 
@@ -29,8 +30,6 @@ module Lattice
   seeds = config.known_hosts.map &.to_ip
 
   client = Chord.new(local_ip, seeds)
-
-  spawn client.run
 
   loop do
     print "> "

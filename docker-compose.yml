@@ -1,0 +1,49 @@
+version: '3.4'
+services:
+  seed:
+    image: lattice
+    volumes:
+    - ./conf/seed.conf.yml:/lattice/lattice.conf.yml
+    networks:
+      static-network:
+        ipv4_address: 172.20.128.2
+    tty: true
+    stdin_open: true
+  client_one:
+    image: lattice
+    volumes:
+    - ./conf/client_one.conf.yml:/lattice/lattice.conf.yml
+    networks:
+      static-network:
+        ipv4_address: 172.20.128.3
+    tty: true
+    stdin_open: true
+    depends_on:
+      - seed
+  client_two:
+    image: lattice
+    volumes:
+    - ./conf/client_two.conf.yml:/lattice/lattice.conf.yml
+    networks:
+      static-network:
+        ipv4_address: 172.20.128.6
+    tty: true
+    depends_on:
+      - seed
+  client_three:
+    image: lattice
+    volumes:
+    - ./conf/client_three.conf.yml:/lattice/lattice.conf.yml
+    networks:
+      static-network:
+        ipv4_address: 172.20.128.5
+    tty: true
+    stdin_open: true
+    depends_on:
+      - seed
+
+networks:
+  static-network:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
