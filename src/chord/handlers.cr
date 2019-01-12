@@ -6,7 +6,7 @@ class Chord
     case command
     when SetCommand
       packet = Message::ChordPacket.from_command command, @local_hash
-      self.route(packet, key: command.key).await(5) do |response|
+      self.route(packet, key: command.key).await(5.seconds) do |response|
         case inner_response = response.command
         when SetResponse
           if inner_response.success
@@ -24,7 +24,7 @@ class Chord
       # otherwise route according to Chord protocol
       else
         packet = Message::ChordPacket.from_command command, @local_hash
-        self.route(packet, key: key).await(5) do |response|
+        self.route(packet, key: key).await(5.seconds) do |response|
           case inner_cmd = response.command
           when GetResponse
             if value = inner_cmd.value
@@ -37,7 +37,7 @@ class Chord
       end
     when OwnersCommand
       packet = Message::ChordPacket.from_command(command, @local_hash)
-      self.route(packet, key: command.key).await(5) do |response|
+      self.route(packet, key: command.key).await(5.seconds) do |response|
         case inner_cmd = response.command
         when OwnersResponse
           puts (inner_cmd.nodes.map &.[:value]).join("\n")

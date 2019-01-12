@@ -40,7 +40,7 @@ module Timer
           when value = @chan.receive
             block.call(value.not_nil!)
             break
-          when Timer.after(3.seconds).receive
+          when Timer.after(time).receive
             if errback = @on_timeout
               errback.call
             end
