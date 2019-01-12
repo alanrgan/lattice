@@ -49,7 +49,7 @@ class Chord::Controller
     # puts "In handle_incoming_messages fn for #{ip}"
     loop do
       # puts "waiting for message from #{ip}"
-      message = socket.gets
+      message = socket.gets rescue nil
       # puts "Got message from #{ip}: #{message}"
       # Handle socket disconnect
       if message.nil?

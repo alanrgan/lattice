@@ -90,9 +90,9 @@ class Chord
     end
 
     def add_all(entries : Array({StoreKey, StoreEntry}))
-      @mux.synchronize do  
+      @mux.synchronize do
         entries.each do |entry|
-          own_entry = @kvmap[entry[0]]
+          own_entry = @kvmap[entry[0]]?
           if !own_entry
             @kvmap[entry[0]] = entry[1]
           # Only allow more recent updates by checking counter

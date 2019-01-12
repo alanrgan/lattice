@@ -13,6 +13,12 @@ class Chord
     end
   end
 
+  private def unmark_as_contacted(ip : String)
+    @contacted_mux.synchronize do
+      @contacted.delete(ip)
+    end
+  end
+
   private def mark_as_contacted(ip : String)
     @contacted_mux.synchronize do
       @contacted.add(ip)
@@ -95,12 +101,13 @@ class Chord
         case inner_cmd = response.command
         when PredNotifResponse
           if !have_contacted
+            puts "Adding keys #{inner_cmd.keys}"
             @store.add_all(inner_cmd.keys)
+            self.mark_as_contacted(successor_ip.to_s)
           end
         end
       end
-
-      self.mark_as_contacted(successor_ip.to_s)
+      
     end
   end
 end

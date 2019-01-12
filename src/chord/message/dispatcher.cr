@@ -19,14 +19,12 @@ class Chord::Dispatcher
   end
 
   def send_or(addr, packet : Message::Packet)
-    begin
-      conn = @ip_to_connection[addr]
-      conn.mux.synchronize do
-        base_packet = Message::Base.new packet
-        conn.socket.puts base_packet.serialize
-      end
-    rescue
-      yield
+    conn = @ip_to_connection[addr]
+    conn.mux.synchronize do
+      base_packet = Message::Base.new packet
+      conn.socket.puts base_packet.serialize
     end
+  rescue
+    yield
   end
 end

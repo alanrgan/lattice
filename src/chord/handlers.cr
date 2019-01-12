@@ -90,7 +90,7 @@ class Chord
           if pred_of_pred = command.pred_of_pred
             entries = @store.entries_in_range(pred_of_pred, @local_hash)
             if successor = @finger_table.successor
-              @store.clamp_to_range(pred_of_pred, @local_hash)
+              @store.clamp_to_range(pred_of_pred, successor)
             end
           end
 

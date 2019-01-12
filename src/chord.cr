@@ -45,6 +45,9 @@ class Chord
   def notify_failure(ip : Socket::IPAddress)
     hashed_ip = CHash.digest_pair(ip.to_s)
     successor = self.successor_of(ip)
+    
+    self.unmark_as_contacted(ip.to_s)
+    self.unmark_as_contacted(successor[:value])
     @finger_table.replace_all(hashed_ip, successor)
   end
 
